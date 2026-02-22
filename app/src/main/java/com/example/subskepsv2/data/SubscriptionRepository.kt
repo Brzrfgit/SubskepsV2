@@ -9,4 +9,8 @@ class SubscriptionRepository(private val subscriptionDao: SubscriptionDao) {
     suspend fun insert(subscription: Subscription) {
         subscriptionDao.insertSubscription(subscription)
     }
+
+    suspend fun delete(subscription: Subscription) {
+        subscriptionDao.deleteSubscription(subscription)
+    }
 }

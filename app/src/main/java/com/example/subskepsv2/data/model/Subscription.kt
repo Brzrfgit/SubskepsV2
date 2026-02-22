@@ -8,5 +8,7 @@ data class Subscription(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
-    val price: String
+    val price: String,
+    val cycle: String, // Harian, Mingguan, Bulanan, Tahunan
+    val billingDate: String // Tanggal jatuh tempo
 )

@@ -8,34 +8,42 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.subskepsv2.ui.screens.HomeScreen
 import com.example.subskepsv2.ui.screens.AddSubscriptionScreen
+import com.example.subskepsv2.ui.screens.SettingsScreen
 import com.example.subskepsv2.viewmodel.SubscriptionViewModel
+import com.example.subskepsv2.viewmodel.ThemeViewModel
 
 @Composable
 fun AppNavigation(
-navController: NavHostController,
-viewModel: SubscriptionViewModel // 1. Terima ViewModel di sini
+    navController: NavHostController,
+    subscriptionViewModel: SubscriptionViewModel,
+    themeViewModel: ThemeViewModel
 ) {
     NavHost(navController = navController, startDestination = "home") {
 
-        // HALAMAN HOME
         composable("home") {
-            // 2. Observasi State: Ambil data terbaru dari ViewModel
-            val subscriptions by viewModel.subscriptions.collectAsState()
+            val subscriptions by subscriptionViewModel.subscriptions.collectAsState()
 
             HomeScreen(
-                subscriptions = subscriptions, // Kirim list data ke UI
-                onNavigateToAdd = { navController.navigate("add_subscription") }
+                subscriptions = subscriptions,
+                onNavigateToAdd = { navController.navigate("add_subscription") },
+                onNavigateToSettings = { navController.navigate("settings") },
+                onDeleteSubscription = { subscriptionViewModel.deleteSubscription(it) }
             )
         }
 
-        // HALAMAN TAMBAH
         composable("add_subscription") {
             AddSubscriptionScreen(
-                onSave = { name, price ->
-                    // 3. Kirim Aksi: Beritahu ViewModel untuk menambah data
-                    viewModel.addSubscription(name, price)
-                    navController.popBackStack() // Kembali ke Home setelah simpan
+                onSave = { name, price, cycle, billingDate ->
+                    subscriptionViewModel.addSubscription(name, price, cycle, billingDate)
+                    navController.popBackStack()
                 },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("settings") {
+            SettingsScreen(
+                themeViewModel = themeViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

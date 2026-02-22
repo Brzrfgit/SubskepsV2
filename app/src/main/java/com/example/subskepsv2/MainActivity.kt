@@ -1,27 +1,28 @@
 package com.example.subskepsv2
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels // Tambahkan ini
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.subskepsv2.data.AppDatabase
+import com.example.subskepsv2.data.SubscriptionRepository
 import com.example.subskepsv2.ui.navigation.AppNavigation
 import com.example.subskepsv2.ui.theme.SubskepsV2Theme
 import com.example.subskepsv2.viewmodel.SubscriptionViewModel
+import com.example.subskepsv2.viewmodel.ThemeViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.subskepsv2.data.AppDatabase
-import com.example.subskepsv2.data.SubscriptionRepository
 
 class MainActivity : ComponentActivity() {
-    // Inisialisasi ViewModel secara global di Activity
-    private val viewModel: SubscriptionViewModel by viewModels {
+
+    private val subscriptionViewModel: SubscriptionViewModel by viewModels {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -31,18 +32,40 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SubskepsV2Theme {
-                val navController = rememberNavController()
 
-                // Masukkan viewModel ke dalam Navigasi
-                AppNavigation(navController = navController, viewModel = viewModel)
+    private val themeViewModel: ThemeViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val database = AppDatabase.getDatabase(applicationContext)
+                return ThemeViewModel(database.settingsDao()) as T
             }
         }
     }
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Minta izin notifikasi untuk Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        enableEdgeToEdge()
+        setContent {
+            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+            SubskepsV2Theme(darkTheme = isDarkTheme) {
+                val navController = rememberNavController()
+                AppNavigation(
+                    navController = navController,
+                    subscriptionViewModel = subscriptionViewModel,
+                    themeViewModel = themeViewModel
+                )
+            }
+        }
+    }
 }

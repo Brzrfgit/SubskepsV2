@@ -17,9 +17,22 @@ class SubscriptionViewModel(private val repository: SubscriptionRepository) : Vi
         initialValue = emptyList()
     )
 
-    fun addSubscription(name: String, price: String) {
+    fun addSubscription(name: String, price: String, cycle: String, billingDate: String) {
         viewModelScope.launch {
-            repository.insert(Subscription(name = name, price = price))
+            repository.insert(
+                Subscription(
+                    name = name,
+                    price = price,
+                    cycle = cycle,
+                    billingDate = billingDate
+                )
+            )
+        }
+    }
+
+    fun deleteSubscription(subscription: Subscription) {
+        viewModelScope.launch {
+            repository.delete(subscription)
         }
     }
 }

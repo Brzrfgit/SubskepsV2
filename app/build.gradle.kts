@@ -2,14 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
+    alias(libs.plugins.google.devtools.ksp)
 }
 
 android {
     namespace = "com.example.subskepsv2"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.subskepsv2"
@@ -61,10 +59,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
     val room_version = "2.6.1"
-
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
-    // KSP adalah pemroses anotasi modern untuk Room
-    annotationProcessor("androidx.room:room-compiler:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
 }
